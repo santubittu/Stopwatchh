@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Working Stopwatch + Countdown</title>
+<style>
+  body {font-family: Arial; text-align:center; padding:50px; background:#111; color:#0f0;}
+  #time {font-size:80px; margin:30px; font-weight:bold; letter-spacing:5px;}
+  button {padding:15px 30px; font-size:20px; margin:10px; border:none; border-radius:10px; cursor:pointer;}
+  .start {background:#2ecc71; color:white;}
+  .stop  {background:#e74c3c; color:white;}
+  .reset {background:#3498db; color:white;}
+  input {padding:12px; font-size:18px; width:240px;}
+</style>
+</head>
+<body>
+
+<h1>Stopwatch + Countdown (Works Perfectly)</h1>
+<div id="time">00:00:00</div>
+
+<p>Start time: <span id="start">-</span></p>
+<p>Set end time → counts DOWN: <input type="datetime-local" id="end"></p>
+
+<button class="start" onclick="start()">Start Count UP</button>
+<button class="stop"  onclick="stop()">Stop</button>
+<button class="reset" onclick="reset()">Reset</button>
+
+<script>
+let timer;
+let startMs = 0;
+let running = false;
+
+function format(sec) {
+  let h = Math.floor(sec/3600).toString().padStart(2,'0');
+  let m = Math.floor((sec%3600)/60).toString().padStart(2,'0');
+  let s = Math.abs(sec%60).toString().padStart(2,'0');
+  return (sec < 0 ? "-" : "") + `${h}:${m}:${s}`;
+}
+
+function update() {
+  let endInput = document.getElementById('end').value;
+  let now = Date.now();
+
+  // COUNTDOWN mode (if end time is set)
+  if (endInput && startMs) {
+    let end = new Date(endInput).getTime();
+    let remainingSec = Math.floor((end - now) / 1000);
+    document.getElementById('time').textContent = format(remainingSec);
+    if (remainingSec <= 0) {
+      document.getElementById('time').style.color = "#f00";
+      clearInterval(timer);
+      running = false;
+    }
+    return;
+  }
+
+  // Normal COUNT UP
+  let elapsedSec = Math.floor((now - startMs) / 1000);
+  document.getElementById('time').textContent = format(elapsedSec);
+}
+
+function start() {
+  if (running) return;
+  startMs = Date.now();
+  document.getElementById('start').textContent = new Date().toLocaleString();
+  document.getElementById('time').style.color = "#0f0";
+  running = true;
+  timer = setInterval(update, 500);
+  update();
+}
+
+function stop() {
+  clearInterval(timer);
+  running = false;
+}
+
+function reset() {
+  clearInterval(timer);
+  running = false;
+  startMs = 0;
+  document.getElementById('time').textContent = "00:00:00";
+  document.getElementById('time').style.color = "#0f0";
+  document.getElementById('start').textContent = "-";
+  document.getElementById('end').value = "";
+}
+
+// Update instantly when you change the end time
+document.getElementById('end').addEventListener('input', update);
+</script>
+
+</body>
+</html>
